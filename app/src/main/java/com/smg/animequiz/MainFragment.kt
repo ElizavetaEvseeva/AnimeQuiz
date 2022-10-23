@@ -40,10 +40,10 @@ class MainFragment : Fragment() {
 
         val controller = findNavController()
         view.findViewById<Button>(R.id.buttonStart).setOnClickListener{
-            //navigate
+            controller.navigate(R.id.action_mainFragment_to_gameModeFragment)
         }
         view.findViewById<Button>(R.id.buttonWatchList).setOnClickListener {
-            //navigate
+            controller.navigate(R.id.action_mainFragment_to_watchlistFragment)
         }
     }
 

@@ -5,6 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.findNavController
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -17,6 +21,11 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class GameModeFragment : Fragment() {
+
+
+    private lateinit var navController: NavController
+
+
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
@@ -27,6 +36,32 @@ class GameModeFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+        navController = findNavController()
+
+        view.findViewById<androidx.cardview.widget.CardView>(R.id.idCardView1990).setOnClickListener{
+            onClickCard(1990)
+        }
+        view.findViewById<androidx.cardview.widget.CardView>(R.id.idCardView2000).setOnClickListener{
+            onClickCard(2000)
+        }
+        view.findViewById<androidx.cardview.widget.CardView>(R.id.idCardView2010).setOnClickListener{
+            onClickCard(2010)
+        }
+        view.findViewById<androidx.cardview.widget.CardView>(R.id.idCardView2018).setOnClickListener{
+            onClickCard(2018)
+        }
+    }
+
+    private fun onClickCard(year: Int){
+        val b = Bundle()
+        b.putInt("year", year)
+        this.navController.navigate(R.id.action_gameModeFragment_to_quizFragment2, b)
     }
 
     override fun onCreateView(

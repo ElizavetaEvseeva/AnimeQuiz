@@ -17,7 +17,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/defaultQuizPic"
+        android:src="@drawable/default_quiz_picture"
         android:layout_margin="5dp"
         android:padding="5dp"
         android:layout_gravity="center"
@@ -59,6 +59,7 @@
         android:text="Evangelion"/>
 
     <TextView
+        android:id="@+id/idTextViewProgress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp"
