@@ -38,9 +38,6 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
-
         val controller = findNavController()
         view.findViewById<Button>(R.id.buttonStart).setOnClickListener{
             //navigate
