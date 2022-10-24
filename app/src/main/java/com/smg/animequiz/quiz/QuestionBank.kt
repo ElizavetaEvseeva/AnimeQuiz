@@ -1,43 +1,42 @@
 package com.smg.animequiz.quiz
 
+import com.smg.animequiz.MainActivity
 import com.smg.animequiz.models.Anime
 import com.smg.animequiz.models.AnimeCharacter
 import kotlin.random.Random
 
-class QuestionBank(allAnime: ArrayList<Anime>, chars: ArrayList<AnimeCharacter>, count: Int) {
+class QuestionBank() {
 
-    public val questions: ArrayList<Question> = ArrayList()
-    init {
+    val questions: ArrayList<Question> = ArrayList()
+
+    fun generateQuestions(allAnime: ArrayList<Anime>, count: Int){
+
+        questions.clear()
+
         val rndList = ArrayList<Int>()
 
         for (i in 1..count){
-            var nextInt = Random.nextInt(0, chars.count())
+            var nextInt = Random.nextInt(0, allAnime.count())
             while (rndList.contains(nextInt)){
-                nextInt = Random.nextInt(0, chars.count())
+                nextInt = Random.nextInt(0, allAnime.count())
             }
             rndList.add(nextInt)
         }
+        val animesToLoadScreenshots = ArrayList<Anime>()
         rndList.forEach{
-            val rndAnime = getRandomAnimeForChar(chars[it], allAnime)
+            animesToLoadScreenshots.add(allAnime[it])
             questions.add(
-                Question(chars[it],
-                    rndAnime,
-                    getRandomAnimes(rndAnime, 3, allAnime)
+                Question(
+                    allAnime[it],
+                    getRandomAnimes(allAnime[it], 3, allAnime)
                 )
             )
         }
-    }
-
-    private fun getRandomAnimeForChar(char: AnimeCharacter, sourceList: ArrayList<Anime>): Anime{
-        var anime = sourceList[Random.nextInt(0, sourceList.count())]
-        while(char.anime == anime){
-            anime = sourceList[Random.nextInt(0, sourceList.count())]
-        }
-        return anime
+        MainActivity.shikimoriService.getAnimeScreenshotLinks(animesToLoadScreenshots, MainActivity.context)
     }
 
     private fun getRandomAnimes(anime: Anime, count: Int, sourseList: ArrayList<Anime>): ArrayList<Anime>{
-        var animes = ArrayList<Anime>()
+        val animes = ArrayList<Anime>()
         var rndAnime = sourseList[Random.nextInt(0, sourseList.count())]
         for (i in 1..(count + 1)){
             while (rndAnime == anime || animes.contains(rndAnime)){
@@ -48,3 +47,10 @@ class QuestionBank(allAnime: ArrayList<Anime>, chars: ArrayList<AnimeCharacter>,
         return animes
     }
 }
+//private fun getRandomAnimeForChar(char: AnimeCharacter, sourceList: ArrayList<Anime>): Anime{
+//    var anime = sourceList[Random.nextInt(0, sourceList.count())]
+//    while(char.anime == anime){
+//        anime = sourceList[Random.nextInt(0, sourceList.count())]
+//    }
+//    return anime
+//}
