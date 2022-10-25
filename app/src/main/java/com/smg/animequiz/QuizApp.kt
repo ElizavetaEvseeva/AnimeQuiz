@@ -10,17 +10,21 @@ import com.smg.animequiz.models.Anime
 import com.smg.animequiz.quiz.QuestionBank
 import com.smg.animequiz.shikimoriapi.ShikimoriService
 
+const val QUESTION_COUNT = 10
+const val LOG_TAG="quiz_log"
 
 class QuizApp: Application() {
 
     private lateinit var requestQueue: RequestQueue
     private lateinit var shikimoriService : ShikimoriService
+    private lateinit var dbHelper: DBHelper
     var gameState: GameState = GameState()
     val questionBank = QuestionBank()
 
-    public val getGameState get() = gameState
-    public val getShikimoriService get() = shikimoriService
-    public val getQuestionBank get() = questionBank
+    val getGameState get() = gameState
+    val getShikimoriService get() = shikimoriService
+    val getQuestionBank get() = questionBank
+    val getDBHelper get() = dbHelper
 
     override fun onCreate() {
         Log.d(LOG_TAG, "APP CREATED")
@@ -29,6 +33,7 @@ class QuizApp: Application() {
 
         requestQueue = Volley.newRequestQueue(applicationContext)
         shikimoriService = ShikimoriService()
+        dbHelper = DBHelper(applicationContext, null)
     }
 
     companion object {
@@ -73,22 +78,22 @@ class QuizApp: Application() {
         //    questionBankInitComplete(it)
         //}
         shikimoriService.getAnimeScreenshotLinksTest(animesToLoadScreenShots, getRequestQueue()){
-            questionBankInitComplete(it)
+            //questionBankInitComplete(it)
         }
     }
 
-    fun questionBankInitComplete(success: Boolean){
-        if (!success){
-            Log.e("QUIZ_ERROR", "Failed to load questions")
-            return
-        }
-        gameState.state = State.WAITING_INPUT
-        Log.d(LOG_TAG, "QUESTING BANK INIT COMPLETE")
+    //fun questionBankInitComplete(success: Boolean){
+    //    if (!success){
+    //        Log.e("QUIZ_ERROR", "Failed to load questions")
+    //        return
+    //    }
+    //    gameState.state = State.WAITING_INPUT
+    //    Log.d(LOG_TAG, "QUESTING BANK INIT COMPLETE")
 
-        val quizFragment = MainActivity.getInstance!!
-            .findViewById<FragmentContainerView>(R.id.fragmentContainerView)
-            .getFragment<QuizFragment>()
+    //    val quizFragment = MainActivity.getInstance!!
+    //        .findViewById<FragmentContainerView>(R.id.fragmentContainerView)
+    //        .getFragment<QuizFragment>()
 
-        quizFragment.run()
-    }
+    //    quizFragment.run()
+    //}
 }

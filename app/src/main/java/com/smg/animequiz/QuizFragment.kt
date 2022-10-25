@@ -12,9 +12,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.button.MaterialButton
 import com.smg.animequiz.models.Anime
 import com.smg.animequiz.quiz.Question
 import com.smg.animequiz.quiz.QuestionBank
@@ -23,12 +25,17 @@ import com.squareup.picasso.Picasso
 class QuizFragment : Fragment() {
 
 
-    private lateinit var buttonA: Button
-    private lateinit var buttonB: Button
-    private lateinit var buttonC: Button
-    private lateinit var buttonD: Button
+    private lateinit var buttonA: MaterialButton
+    private lateinit var buttonB: MaterialButton
+    private lateinit var buttonC: MaterialButton
+    private lateinit var buttonD: MaterialButton
+    private lateinit var allButtons: ArrayList<MaterialButton>
+
     private lateinit var textProgress: TextView
     private lateinit var quizImage: ImageView
+
+    private lateinit var buttonNext: Button
+    private lateinit var buttonAbout: Button
 
 
     private lateinit var navController: NavController
@@ -36,14 +43,18 @@ class QuizFragment : Fragment() {
     private var year: Int = 0
 
     private var nextQuestionIndex = 0
+    private var guessed = 0
 
     private var currentQuestion: Question? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             year = it.getInt("year")
         }
+
+
     }
 
     override fun onCreateView(
@@ -88,14 +99,24 @@ class QuizFragment : Fragment() {
         buttonC.setOnClickListener { buttonAnswerClick(buttonC) }
         buttonD.setOnClickListener { buttonAnswerClick(buttonD) }
 
+        allButtons = ArrayList()
+        allButtons.add(buttonA)
+        allButtons.add(buttonB)
+        allButtons.add(buttonC)
+        allButtons.add(buttonD)
+
+        buttonNext = view.findViewById(R.id.idButtonNext)
+        buttonAbout = view.findViewById(R.id.idButtonAbout)
+
+        buttonNext.isVisible = false
+        buttonAbout.isVisible = false
 
         view.findViewById<Button>(R.id.idButtonNext).setOnClickListener { buttonNextClick() }
 
-         view.findViewById<Button>(R.id.idButtonAbout).setOnClickListener { buttonAboutClick()  }
+        view.findViewById<Button>(R.id.idButtonAbout).setOnClickListener { buttonAboutClick()  }
 
         quizImage = view.findViewById(R.id.idImageMainQuiz)
 
-        //QuizApp.instance.startQuizSession( year)
         startQuizSession(year)
         Log.d(LOG_TAG, "QUIZ VIEW CREATED COMPLETE")
     }
@@ -105,9 +126,16 @@ class QuizFragment : Fragment() {
     }
 
     private fun buttonNextClick(){
-        if (nextQuestionIndex > QUESTION_COUNT){
+
+        if ( QuizApp.instance.gameState.state != State.WAITING_NEXT){
+            return
+        }
+
+        if (nextQuestionIndex >= QUESTION_COUNT){
+            Log.d(LOG_TAG, "MOVING TO LAST PAGE")
             val b = Bundle()
-            b.putInt("correct_count", QuizApp.instance.getGameState.correctCount)
+            //b.putInt("correct_count", QuizApp.instance.getGameState.correctCount)
+            b.putInt("correct_count", guessed)
             this.navController.navigate(R.id.action_quizFragment2_to_completeFragment, b)
         } else {
             setNextQuestion()
@@ -115,6 +143,9 @@ class QuizFragment : Fragment() {
     }
 
     private fun buttonAboutClick(){
+        if ( QuizApp.instance.gameState.state != State.WAITING_NEXT){
+            return
+        }
         val b = Bundle()
         b.putString("anime_link", currentQuestion!!.answer.link)
         this.navController.navigate(R.id.action_quizFragment2_to_aboutAnimeFragment, b)
@@ -124,36 +155,54 @@ class QuizFragment : Fragment() {
 
         if (QuizApp.instance.getGameState.state != State.WAITING_INPUT) return
 
+        QuizApp.instance.gameState.state = State.WAITING_NEXT
+
+
         var correct: Boolean = false
         @ColorRes var color: Int
         if (answerButton.text == currentQuestion!!.answer.title){
-            color = R.color.teal_700
+            color = R.color.correct_answer
             correct = true
         } else {
-            color = R.color.black
+            color = R.color.wrong_answer
         }
-        answerButton.setBackgroundColor( ContextCompat.getColor(MainActivity.getContext()!!, color))
+        answerButton.setBackgroundColor( ContextCompat.getColor(QuizApp.instance.applicationContext!!, color))
 
-        if (correct) QuizApp.instance.getGameState.correctCount++
+        //if (correct) QuizApp.instance.getGameState.correctCount++
+        if (correct) guessed++
+        else{
+            allButtons.forEach{
+                if(it.text == currentQuestion!!.answer.title) it.setBackgroundColor(
+                    ContextCompat.getColor(QuizApp.instance.applicationContext!!, R.color.correct_answer))
+            }
+        }
         nextQuestionIndex++
+
+        buttonNext.isVisible = true
+        buttonAbout.isVisible = true
     }
 
 
     private fun setNextQuestion(){
 
+        buttonNext.isVisible = false
+        buttonAbout.isVisible = false
+
         val q = QuizApp.instance.questionBank.questions[nextQuestionIndex]
 
-        buttonA.text = q.options[0].title
-        buttonB.text = q.options[1].title
-        buttonC.text = q.options[2].title
-        buttonD.text = q.options[3].title
+        for (i in 0..3){
+            allButtons[i].text = q.options[i].title
+            allButtons[i].setBackgroundColor(
+                ContextCompat.getColor(QuizApp.instance.applicationContext!!, R.color.purple_200))
+        }
 
         QuizApp.instance.getShikimoriService.loadPictureIntoView(quizImage, q.answer.screenshotLink!!)
 
-        textProgress.text = "$nextQuestionIndex/$QUESTION_COUNT"
+        textProgress.text = "${nextQuestionIndex + 1}/$QUESTION_COUNT"
 
         currentQuestion = q
 
+        QuizApp.instance.gameState.state = State.WAITING_INPUT
     }
 
     private fun startQuizSession(year: Int){

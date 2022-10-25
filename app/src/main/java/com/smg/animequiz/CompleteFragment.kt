@@ -38,6 +38,8 @@ class CompleteFragment : Fragment() {
 
         textViewResult = view.findViewById(R.id.idTextViewResults)
         textViewResult.text = "Угадано $correctCount/$QUESTION_COUNT"
+        //textViewResult.text = "Угадано ${QuizApp.instance.gameState.correctCount}/$QUESTION_COUNT"
+        //textViewResult.text = "Угадано ${QuizApp.instance.gameState.correctCount}/$QUESTION_COUNT"
 
         view.findViewById<Button>(R.id.idButtonCompleteReturn).setOnClickListener {
             buttonReturnClick()

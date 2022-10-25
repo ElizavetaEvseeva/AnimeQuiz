@@ -16,21 +16,17 @@ import com.android.volley.toolbox.Volley
 import com.smg.animequiz.quiz.QuestionBank
 import com.smg.animequiz.shikimoriapi.ShikimoriService
 
-const val QUESTION_COUNT = 10
-const val LOG_TAG="quiz_log"
 
 class MainActivity : AppCompatActivity() {
 
-    init {
+    init{
         instance = this
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initComponents()
-        hideSystemBars()
-        //setupActionBarWithNavController(findNavController(R.id.fragmentContainerView))
+        //hideSystemBars()
     }
 
     private fun hideSystemBars() {
@@ -43,24 +39,10 @@ class MainActivity : AppCompatActivity() {
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
-
-
     companion object{
-
         private var instance: MainActivity? = null
+
         val getInstance get() = instance
 
-        var dbHelper: DBHelper? = null
-
-        fun getContext(): Context?{
-            return instance!!.applicationContext
-        }
-
-        private fun initComponents(){
-            var c = getContext()
-            if (c != null) {
-                dbHelper = DBHelper(c, null)
-            }
-        }
     }
 }

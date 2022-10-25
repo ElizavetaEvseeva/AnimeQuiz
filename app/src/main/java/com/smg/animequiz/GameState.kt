@@ -2,7 +2,8 @@ package com.smg.animequiz
 
 enum class State{
     LOADING,
-    WAITING_INPUT
+    WAITING_INPUT,
+    WAITING_NEXT
 }
 
 class GameState {

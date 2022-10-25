@@ -29,6 +29,7 @@ class AboutAnimeFragment : Fragment() {
     private var info: AnimeInfo? = null
 
 
+    private lateinit var buttonBack: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,10 +59,19 @@ class AboutAnimeFragment : Fragment() {
         textViewYear = view.findViewById(R.id.idTextViewYear)
         textViewDescription = view.findViewById(R.id.idTextViewDescription)
 
+        buttonBack = view.findViewById<Button?>(R.id.idButtonAboutBack)
+        buttonBack.setOnClickListener {
+            buttonBackClick()
+        }
+
 
         QuizApp.instance.getShikimoriService.getAnimeInfo(animeLink!!, QuizApp.instance.applicationContext) {
             receiveAnimeInfo( it )
         }
+    }
+
+    private fun buttonBackClick(){
+        findNavController().popBackStack()
     }
 
     private fun receiveAnimeInfo(animeInfo: AnimeInfo){
@@ -70,13 +80,15 @@ class AboutAnimeFragment : Fragment() {
         textViewTitle.text = animeInfo.title
         textViewRating.text = "Рейтинг: ${animeInfo.rating}"
         textViewYear.text = "Вышло: ${animeInfo.year}"
-        val d = if (animeInfo.description.length > 200) animeInfo.description.substring(0..199) + "..."
+        val d = if (animeInfo.description.length > 150) (animeInfo.description.substring(0..149) + "...")
         else animeInfo.description
-        textViewDescription.text = "Описание: \n $d"
+        textViewDescription.text = "Описание:\n$d"
     }
 
     private fun buttonAddToWatchlistClick(){
-        MainActivity.dbHelper?.addTitle(textViewTitle.text.toString(), info!!.fullLink, info!!.smallPosterLink)
+
+        QuizApp.instance.getDBHelper.addTitle(textViewTitle.text.toString(), info!!.fullLink, info!!.smallPosterLink)
+
     }
 
 }

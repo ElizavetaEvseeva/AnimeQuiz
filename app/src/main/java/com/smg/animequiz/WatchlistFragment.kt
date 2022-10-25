@@ -1,10 +1,14 @@
 package com.smg.animequiz
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.smg.animequiz.models.TitleRVModel
 
@@ -15,6 +19,9 @@ class WatchlistFragment : Fragment() {
     lateinit var adapter: TitleRVAdapter
     val titlesList = ArrayList<TitleRVModel>()
 
+    lateinit var buttonBack: Button
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -22,10 +29,23 @@ class WatchlistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        buttonBack = view.findViewById(R.id.idWatchListButtonBack)
+        buttonBack.setOnClickListener {
+            buttonBackClick()
+        }
+
         titlesRV = view.findViewById(R.id.idRVAnimeTitles)
         adapter = TitleRVAdapter(titlesList)
+        titlesRV.layoutManager = LinearLayoutManager(context)
+        titlesRV.adapter = adapter
+        Log.d(LOG_TAG, "Reading db")
         readTitlesFromDB()
+        Log.d(LOG_TAG, "READ ITEMS")
         adapter.notifyDataSetChanged()
+    }
+
+    private fun buttonBackClick(){
+        findNavController().popBackStack()
     }
 
 
@@ -40,7 +60,7 @@ class WatchlistFragment : Fragment() {
 
     private fun readTitlesFromDB(){
 
-        val cursor = MainActivity.dbHelper?.getTitle()
+        val cursor = QuizApp.instance.getDBHelper.getTitle()
 
         cursor!!.moveToFirst()
 
@@ -61,7 +81,7 @@ class WatchlistFragment : Fragment() {
         }
         titlesList.add(TitleRVModel(name, link, posterLink))
 
-        while(cursor.moveToFirst()){
+        while(cursor.moveToNext()){
             var index = cursor.getColumnIndex(DBHelper.NAME_COL)
             var name = ""
             if(index >= 0){
@@ -77,6 +97,7 @@ class WatchlistFragment : Fragment() {
             if(index >= 0){
                 posterLink = cursor.getString(index)
             }
+            titlesList.add(TitleRVModel(name, link, posterLink))
         }
         cursor.close()
     }
