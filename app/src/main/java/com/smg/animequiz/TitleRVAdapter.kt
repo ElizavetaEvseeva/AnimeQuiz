@@ -37,7 +37,7 @@ class TitleRVAdapter (
     override fun onBindViewHolder(holder: TitleRVAdapter.TitleViewHolder, position: Int) {
         holder.titleNameTV.text = titlesList[position].name
         holder.link = titlesList[position].link
-        MainActivity.shikimoriService.loadPictureIntoView(
+        QuizApp.instance.getShikimoriService.loadPictureIntoView(
             holder.titleIV,
             titlesList[position].posterLink)
     }

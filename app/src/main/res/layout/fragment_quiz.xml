@@ -29,7 +29,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginVertical="30dp"
         android:contentDescription="Screenshot"
         android:elevation="5dp"
         android:adjustViewBounds="true"
@@ -42,8 +41,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
-        android:padding="5dp"
-        android:textSize="20sp"
+        android:padding="3dp"
+        android:textSize="15sp"
         android:text="Evangelion"/>
 
     <Button
@@ -51,24 +50,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
-        android:padding="5dp"
-        android:textSize="20sp"
+        android:padding="3dp"
+        android:textSize="15sp"
         android:text="Evangelion"/>
     <Button
         android:id="@+id/idButtonAnswer3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
-        android:padding="5dp"
-        android:textSize="20sp"
+        android:padding="3dp"
+        android:textSize="15sp"
         android:text="Evangelion"/>
     <Button
         android:id="@+id/idButtonAnswer4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
-        android:padding="5dp"
-        android:textSize="20sp"
+        android:padding="3dp"
+        android:textSize="15sp"
         android:text="Evangelion"/>
 
     <TextView

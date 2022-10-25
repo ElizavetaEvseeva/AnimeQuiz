@@ -1,13 +1,17 @@
 package com.smg.animequiz.shikimoriapi
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.Image
 import android.util.Log
 import android.widget.ImageView
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.smg.animequiz.LOG_TAG
 import com.smg.animequiz.MainActivity
+import com.smg.animequiz.TestResponses
 import com.smg.animequiz.models.Anime
 import com.smg.animequiz.models.AnimeInfo
 import com.squareup.picasso.Picasso
@@ -25,7 +29,52 @@ class ShikimoriService {
 
     val picasso = Picasso.get()
 
-    public fun getMainJsonString(count: Int,year: Int, context: Context){
+
+    fun interface DataParsedCallback{
+        fun run(success: Boolean)
+    }
+
+    //var queue: RequestQueue? = null
+
+
+    public fun getWeatherData(queue: RequestQueue, callback: DataParsedCallback){
+        Log.d(LOG_TAG, "GETTING WEATHER")
+        val link = "https://yahoo-weather5.p.rapidapi.com/weather?location=tokyo&format=json&u=c"
+        val stringRequest = object: StringRequest(
+            Request.Method.GET, link,
+            Response.Listener<String> { response ->
+                val content = JSONObject(response)
+                if (content != null ){
+                    Log.d(LOG_TAG, "GOT RESPONSE")
+                    callback.run(true)
+                }
+            },
+            Response.ErrorListener {  })
+        {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["X-RapidAPI-Key"] = "85d73a73c6msh923a91b87ee6eaep104d13jsn57875f488e8a"
+                headers["X-RapidAPI-Host"] = "yahoo-weather5.p.rapidapi.com"
+                return headers
+            }
+        }
+        queue.add(stringRequest)
+    }
+
+    public fun getTestMainJsonString(count: Int,year: Int, queue: RequestQueue, callback: DataParsedCallback){
+
+        jsonContents = when(year){
+            1990 -> TestResponses.response1990
+            2000 -> TestResponses.response2000
+            2010 -> TestResponses.response2010
+            2018 -> TestResponses.response2018
+            else -> { TestResponses.response2018 }
+        }
+        callback.run(this.parseJsonData())
+    }
+
+
+    public fun getMainJsonString(count: Int,year: Int, queue: RequestQueue, callback: DataParsedCallback){
 
         val yearParam = when(year){
             1990 -> "1990_1999"
@@ -35,16 +84,27 @@ class ShikimoriService {
             else -> { "2018_2022" }
         }
 
-        val queue = Volley.newRequestQueue(context)
+        Log.d(LOG_TAG, "Getting main json string, year: $yearParam")
 
-        val link = "https://shikimori.one/api/animes?kind=tv,movie&score=7&order=random&limit=$count&season=$yearParam"
+        //val queue = Volley.newRequestQueue(context)
+        //queue = Volley.newRequestQueue(context)
+        val totalCount = count + 20
+
+        val link = "https://shikimori.one/api/animes?kind=tv,movie&score=8&order=random&limit=$totalCount&season=$yearParam"
+
+        Log.d(LOG_TAG, "LINKl: $link")
+
+
         val stringRequest = object: StringRequest(
             Request.Method.GET, link,
             Response.Listener<String> { response ->
                 jsonContents = response
-                this.parseJsonData()
+                Log.d(LOG_TAG, "GOT RESPONSE")
+                callback.run(this.parseJsonData())
             },
-            Response.ErrorListener {  })
+            Response.ErrorListener {
+                Log.d(LOG_TAG, "GOT ERROR ${it.message}")
+            })
         {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
@@ -52,7 +112,8 @@ class ShikimoriService {
                 return headers
             }
         }
-        queue.add(stringRequest)
+        queue?.add(stringRequest)
+        Log.d(LOG_TAG, "ADDED REQUEST")
     }
 
     public fun parseJsonData(): Boolean{
@@ -67,7 +128,7 @@ class ShikimoriService {
             return false
         }
 
-        for (i in 0..content.length()){
+        for (i in 0 until content.length()){
             val anime = content.getJSONObject(i)
             val title = anime.getString("russian")
             val link = anime.getString("url")
@@ -86,16 +147,16 @@ class ShikimoriService {
     private var screenShotLoader: ScreenShotLoader? = null
 
     public fun loadPictureIntoView(view: ImageView, link: String){
-        picasso.load(link).into(view)
+        Log.d(LOG_TAG, "https://shikimori.one$link")
+        picasso.load("https://shikimori.one$link").into(view)
     }
 
-    interface AnimeInfoReceiver{
-        fun receive(animeInfo: AnimeInfo)
-    }
 
     fun interface ReceiveAnimeInfo{
         fun receive(animeInfo: AnimeInfo)
     }
+
+
 
     public fun getAnimeInfo(animeLink: String, context: Context, receiver: ReceiveAnimeInfo ){
         val queue = Volley.newRequestQueue(context)
@@ -137,12 +198,25 @@ class ShikimoriService {
         queue.add(stringRequest)
     }
 
-    public fun getAnimeScreenshotLinks(animes: ArrayList<Anime>, context: Context) {
-
-        val queue = Volley.newRequestQueue(context)
-
+    public fun getAnimeScreenshotLinksTest(animes: ArrayList<Anime>, queue: RequestQueue, callback: DataParsedCallback) {
+        Log.d(LOG_TAG, "GETTING SCREENSHOTS")
         screenShotLoader = ScreenShotLoader(animes.count())
+        for (i in 0..9){
+            val linkArray = JSONObject(TestResponses.animeResponses2018[i]).getJSONArray("screenshots")
+            if (linkArray.length() != 0){
+                animes[i].screenshotLink = linkArray.getJSONObject(0).getString("preview")
+                //animes[i].screenshotLink = linkArray.getString(Random.nextInt(0, linkArray.length()))
+                if (screenShotLoader!!.load()){
+                    screenShotLoader = null
+                }
+            }
+        }
+        callback.run(true)
+    }
 
+
+    public fun getAnimeScreenshotLinks(animes: ArrayList<Anime>, queue: RequestQueue, callback: DataParsedCallback) {
+        screenShotLoader = ScreenShotLoader(animes.count())
         for (anime in animes){
             val link = "https://shikimori.one/api${anime.link}"
             val stringRequest = object: StringRequest(
@@ -155,7 +229,7 @@ class ShikimoriService {
                         anime.screenshotLink = linkArray.getString(Random.nextInt(0, linkArray.length()))
                         if (screenShotLoader!!.load()){
                             screenShotLoader = null
-                            MainActivity.questionBankInitComplete(true)
+                            callback.run(true)
                         }
                     }
                 },

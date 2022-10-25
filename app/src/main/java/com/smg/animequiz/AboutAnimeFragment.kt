@@ -59,14 +59,14 @@ class AboutAnimeFragment : Fragment() {
         textViewDescription = view.findViewById(R.id.idTextViewDescription)
 
 
-        MainActivity.shikimoriService.getAnimeInfo(animeLink!!, MainActivity.context) {
+        QuizApp.instance.getShikimoriService.getAnimeInfo(animeLink!!, QuizApp.instance.applicationContext) {
             receiveAnimeInfo( it )
         }
     }
 
     private fun receiveAnimeInfo(animeInfo: AnimeInfo){
         info = animeInfo
-        MainActivity.shikimoriService.loadPictureIntoView(imageViewPoster, animeInfo.posterLink)
+        QuizApp.instance.getShikimoriService.loadPictureIntoView(imageViewPoster, animeInfo.posterLink)
         textViewTitle.text = animeInfo.title
         textViewRating.text = "Рейтинг: ${animeInfo.rating}"
         textViewYear.text = "Вышло: ${animeInfo.year}"
@@ -76,7 +76,7 @@ class AboutAnimeFragment : Fragment() {
     }
 
     private fun buttonAddToWatchlistClick(){
-        MainActivity.dbHelper.addTitle(textViewTitle.text.toString(), info!!.fullLink, info!!.smallPosterLink)
+        MainActivity.dbHelper?.addTitle(textViewTitle.text.toString(), info!!.fullLink, info!!.smallPosterLink)
     }
 
 }

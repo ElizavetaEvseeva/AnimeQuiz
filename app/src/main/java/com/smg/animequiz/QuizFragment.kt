@@ -12,8 +12,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.smg.animequiz.models.Anime
 import com.smg.animequiz.quiz.Question
 import com.smg.animequiz.quiz.QuestionBank
 import com.squareup.picasso.Picasso
@@ -26,8 +28,6 @@ class QuizFragment : Fragment() {
     private lateinit var buttonC: Button
     private lateinit var buttonD: Button
     private lateinit var textProgress: TextView
-    private lateinit var buttonNext: Button
-    private lateinit var buttonAbout: Button
     private lateinit var quizImage: ImageView
 
 
@@ -59,6 +59,8 @@ class QuizFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         super.onViewCreated(view, savedInstanceState)
+
+        Log.d(LOG_TAG, "Created quiz fragment")
 
         navController = findNavController()
 
@@ -93,7 +95,9 @@ class QuizFragment : Fragment() {
 
         quizImage = view.findViewById(R.id.idImageMainQuiz)
 
-        MainActivity.startQuizSession(this, year)
+        //QuizApp.instance.startQuizSession( year)
+        startQuizSession(year)
+        Log.d(LOG_TAG, "QUIZ VIEW CREATED COMPLETE")
     }
 
     fun run(){
@@ -103,7 +107,7 @@ class QuizFragment : Fragment() {
     private fun buttonNextClick(){
         if (nextQuestionIndex > QUESTION_COUNT){
             val b = Bundle()
-            b.putInt("correct_count", MainActivity.gameState.correctCount)
+            b.putInt("correct_count", QuizApp.instance.getGameState.correctCount)
             this.navController.navigate(R.id.action_quizFragment2_to_completeFragment, b)
         } else {
             setNextQuestion()
@@ -118,7 +122,7 @@ class QuizFragment : Fragment() {
 
     private fun buttonAnswerClick(answerButton: Button){
 
-        if (MainActivity.gameState.state != State.WAITING_INPUT) return
+        if (QuizApp.instance.getGameState.state != State.WAITING_INPUT) return
 
         var correct: Boolean = false
         @ColorRes var color: Int
@@ -128,27 +132,66 @@ class QuizFragment : Fragment() {
         } else {
             color = R.color.black
         }
-        answerButton.setBackgroundColor( ContextCompat.getColor(MainActivity.context, color))
+        answerButton.setBackgroundColor( ContextCompat.getColor(MainActivity.getContext()!!, color))
 
-        if (correct) MainActivity.gameState.correctCount++
+        if (correct) QuizApp.instance.getGameState.correctCount++
         nextQuestionIndex++
     }
 
 
     private fun setNextQuestion(){
 
-        val q = MainActivity.questionBank.questions[nextQuestionIndex]
+        val q = QuizApp.instance.questionBank.questions[nextQuestionIndex]
 
         buttonA.text = q.options[0].title
         buttonB.text = q.options[1].title
         buttonC.text = q.options[2].title
         buttonD.text = q.options[3].title
 
-        MainActivity.shikimoriService.loadPictureIntoView(quizImage, q.answer.screenshotLink!!)
+        QuizApp.instance.getShikimoriService.loadPictureIntoView(quizImage, q.answer.screenshotLink!!)
 
         textProgress.text = "$nextQuestionIndex/$QUESTION_COUNT"
 
         currentQuestion = q
 
+    }
+
+    private fun startQuizSession(year: Int){
+        Log.d(LOG_TAG, "Starting quiz session from main activity")
+        QuizApp.instance.gameState = GameState()
+        QuizApp.instance.gameState.state = State.LOADING
+        QuizApp.instance.getShikimoriService.getTestMainJsonString(QUESTION_COUNT, year, QuizApp.instance.getRequestQueue()) {
+            Log.d(LOG_TAG, "GOT MAIN STRING, parsing")
+            dataParsedCallback(it)
+        }
+        Log.d(LOG_TAG, "COMPLETING START QUIZ SESSION")
+    }
+
+    private fun dataParsedCallback(success: Boolean){
+        if (!success){
+            Log.e("QUIZ_ERROR", "Error in shikimori data parsing")
+            return
+        }
+
+        //questionBank.generateQuestions(shikimoriService.allAnimeTitles, QUESTION_COUNT)
+        QuizApp.instance.questionBank.generateTestQuestions(QuizApp.instance.getShikimoriService.allAnimeTitles, QUESTION_COUNT)
+
+        val animesToLoadScreenShots = ArrayList<Anime>()
+        QuizApp.instance.getQuestionBank.questions.forEach{
+            animesToLoadScreenShots.add(it.answer)
+        }
+        QuizApp.instance.getShikimoriService.getAnimeScreenshotLinksTest(animesToLoadScreenShots, QuizApp.instance.getRequestQueue()){
+            questionBankInitComplete(it)
+        }
+    }
+
+    private fun questionBankInitComplete(success: Boolean){
+        if (!success){
+            Log.e("QUIZ_ERROR", "Failed to load questions")
+            return
+        }
+        QuizApp.instance.gameState.state = State.WAITING_INPUT
+        Log.d(LOG_TAG, "QUESTING BANK INIT COMPLETE FROM FRAGMENT")
+        run()
     }
 }

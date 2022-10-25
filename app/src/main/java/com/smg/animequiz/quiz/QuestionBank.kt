@@ -1,6 +1,9 @@
 package com.smg.animequiz.quiz
 
+import android.util.Log
+import com.smg.animequiz.LOG_TAG
 import com.smg.animequiz.MainActivity
+import com.smg.animequiz.QuizApp
 import com.smg.animequiz.models.Anime
 import com.smg.animequiz.models.AnimeCharacter
 import kotlin.random.Random
@@ -8,6 +11,26 @@ import kotlin.random.Random
 class QuestionBank() {
 
     val questions: ArrayList<Question> = ArrayList()
+
+    fun generateTestQuestions(allAnime: ArrayList<Anime>, count: Int){
+
+
+        questions.clear()
+
+        val rndList = ArrayList<Int>()
+        for (i in 1..count){
+            rndList.add(i - 1)
+        }
+        rndList.forEach{
+            questions.add(
+                Question(
+                    allAnime[it],
+                    getRandomAnimes(allAnime[it], 3, allAnime)
+                )
+            )
+        }
+    }
+
 
     fun generateQuestions(allAnime: ArrayList<Anime>, count: Int){
 
@@ -22,9 +45,7 @@ class QuestionBank() {
             }
             rndList.add(nextInt)
         }
-        val animesToLoadScreenshots = ArrayList<Anime>()
         rndList.forEach{
-            animesToLoadScreenshots.add(allAnime[it])
             questions.add(
                 Question(
                     allAnime[it],
@@ -32,7 +53,6 @@ class QuestionBank() {
                 )
             )
         }
-        MainActivity.shikimoriService.getAnimeScreenshotLinks(animesToLoadScreenshots, MainActivity.context)
     }
 
     private fun getRandomAnimes(anime: Anime, count: Int, sourseList: ArrayList<Anime>): ArrayList<Anime>{
@@ -42,6 +62,7 @@ class QuestionBank() {
             while (rndAnime == anime || animes.contains(rndAnime)){
                 rndAnime = sourseList[Random.nextInt(0, sourseList.count())]
             }
+            animes.add(rndAnime)
         }
         animes[Random.nextInt(0, animes.count())] = anime
         return animes

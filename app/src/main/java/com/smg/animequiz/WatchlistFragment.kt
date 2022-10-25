@@ -40,7 +40,7 @@ class WatchlistFragment : Fragment() {
 
     private fun readTitlesFromDB(){
 
-        val cursor = MainActivity.dbHelper.getTitle()
+        val cursor = MainActivity.dbHelper?.getTitle()
 
         cursor!!.moveToFirst()
 

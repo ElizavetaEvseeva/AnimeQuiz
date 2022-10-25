@@ -1,15 +1,23 @@
 package com.smg.animequiz
 
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.Volley
 import com.smg.animequiz.quiz.QuestionBank
 import com.smg.animequiz.shikimoriapi.ShikimoriService
 
 const val QUESTION_COUNT = 10
+const val LOG_TAG="quiz_log"
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,63 +25,42 @@ class MainActivity : AppCompatActivity() {
         instance = this
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        setupActionBarWithNavController(findNavController(R.id.fragmentContainerView))
+        initComponents()
+        hideSystemBars()
+        //setupActionBarWithNavController(findNavController(R.id.fragmentContainerView))
     }
 
-    private var quizFragment: QuizFragment? = null
+    private fun hideSystemBars() {
+        val windowInsetsController =
+            ViewCompat.getWindowInsetsController(window.decorView) ?: return
+        // Configure the behavior of the hidden system bars
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // Hide both the status bar and the navigation bar
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+    }
+
+
 
     companion object{
 
         private var instance: MainActivity? = null
+        val getInstance get() = instance
 
-        public val shikimoriService = ShikimoriService()
-        public val questionBank = QuestionBank()
+        var dbHelper: DBHelper? = null
 
-        public val gameState = GameState()
-
-        val dbHelper: DBHelper = DBHelper(context, null)
-
-        val context get() = instance!!.applicationContext
-
-
-        public val getInstance get() = instance
-
-
-        public fun startQuizSession(fragment: QuizFragment, year: Int){
-
-            gameState.state = State.LOADING
-            shikimoriService.getMainJsonString(QUESTION_COUNT, year, instance!!.applicationContext )
+        fun getContext(): Context?{
+            return instance!!.applicationContext
         }
 
-
-        public fun dataParsedCallback(success: Boolean){
-            if (!success){
-                Log.e("QUIZ_ERROR", "Error in shikimori data parsing")
-                return
+        private fun initComponents(){
+            var c = getContext()
+            if (c != null) {
+                dbHelper = DBHelper(c, null)
             }
-            initQuestionBank()
-        }
-
-        private fun initQuestionBank(){
-            questionBank.generateQuestions(shikimoriService.allAnimeTitles, QUESTION_COUNT)
-        }
-        fun questionBankInitComplete(success: Boolean){
-            if (!success){
-                Log.e("QUIZ_ERROR", "Failed to load questions")
-                return
-            }
-            gameState.state = State.WAITING_INPUT
-
-
-            val quizFragment = instance!!
-                .findViewById<FragmentContainerView>(R.id.fragmentContainerView)
-                .getFragment<QuizFragment>()
-            quizFragment.run()
         }
     }
 }
