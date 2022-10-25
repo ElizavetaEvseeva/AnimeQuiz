@@ -7,6 +7,7 @@
     android:weightSum="5"
     >
     <ImageView
+        android:id="@+id/idImageViewAboutPoster"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/default_poster"
@@ -18,15 +19,21 @@
         />
 
     <TextView
+        android:id="@+id/idTextViewTitleName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/idTextViewTitleName"
         android:layout_margin="5dp"
         android:text="Название: Моб Психо 100 3"/>
     <TextView
+        android:id="@+id/idTextViewRating"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="Рейтинг: 8"/>
+    <TextView
         android:id="@+id/idTextViewYear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:text="Год выпуска: 2022"/>
 

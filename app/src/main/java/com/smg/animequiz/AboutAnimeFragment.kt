@@ -5,55 +5,78 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
+import com.smg.animequiz.models.AnimeInfo
+import com.smg.animequiz.shikimoriapi.ShikimoriService
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM1 = "anime_link"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [AboutAnimeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AboutAnimeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private var animeLink: String? = null
+
+    private lateinit var imageViewPoster: ImageView
+
+    private lateinit var textViewTitle: TextView
+    private lateinit var textViewRating: TextView
+    private lateinit var textViewYear: TextView
+    private lateinit var textViewDescription: TextView
+
+    private var info: AnimeInfo? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            animeLink = it.getString(ARG_PARAM1)
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_about_anime, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AboutAnimeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AboutAnimeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<Button>(R.id.idButtonAddToWatchlist).setOnClickListener {
+            buttonAddToWatchlistClick()
+        }
+        imageViewPoster = view.findViewById(R.id.idImageViewAboutPoster)
+
+        textViewTitle = view.findViewById(R.id.idTextViewTitleName)
+        textViewRating = view.findViewById(R.id.idTextViewRating)
+        textViewYear = view.findViewById(R.id.idTextViewYear)
+        textViewDescription = view.findViewById(R.id.idTextViewDescription)
+
+
+        MainActivity.shikimoriService.getAnimeInfo(animeLink!!, MainActivity.context) {
+            receiveAnimeInfo( it )
+        }
     }
+
+    private fun receiveAnimeInfo(animeInfo: AnimeInfo){
+        info = animeInfo
+        MainActivity.shikimoriService.loadPictureIntoView(imageViewPoster, animeInfo.posterLink)
+        textViewTitle.text = animeInfo.title
+        textViewRating.text = "Рейтинг: ${animeInfo.rating}"
+        textViewYear.text = "Вышло: ${animeInfo.year}"
+        val d = if (animeInfo.description.length > 200) animeInfo.description.substring(0..199) + "..."
+        else animeInfo.description
+        textViewDescription.text = "Описание: \n $d"
+    }
+
+    private fun buttonAddToWatchlistClick(){
+        MainActivity.dbHelper.addTitle(textViewTitle.text.toString(), info!!.fullLink, info!!.smallPosterLink)
+    }
+
 }

@@ -2,12 +2,15 @@ package com.smg.animequiz.shikimoriapi
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.ImageView
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.smg.animequiz.MainActivity
 import com.smg.animequiz.models.Anime
+import com.smg.animequiz.models.AnimeInfo
+import com.squareup.picasso.Picasso
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.random.Random
@@ -19,6 +22,8 @@ class ShikimoriService {
     val jsonContent get() = jsonContents
 
     val allAnimeTitles: ArrayList<Anime> = ArrayList()
+
+    val picasso = Picasso.get()
 
     public fun getMainJsonString(count: Int,year: Int, context: Context){
 
@@ -48,12 +53,6 @@ class ShikimoriService {
             }
         }
         queue.add(stringRequest)
-    }
-
-    public fun getAnimeScreenshot(link: String): Bitmap?{
-
-        return null
-
     }
 
     public fun parseJsonData(): Boolean{
@@ -86,6 +85,57 @@ class ShikimoriService {
     }
     private var screenShotLoader: ScreenShotLoader? = null
 
+    public fun loadPictureIntoView(view: ImageView, link: String){
+        picasso.load(link).into(view)
+    }
+
+    interface AnimeInfoReceiver{
+        fun receive(animeInfo: AnimeInfo)
+    }
+
+    fun interface ReceiveAnimeInfo{
+        fun receive(animeInfo: AnimeInfo)
+    }
+
+    public fun getAnimeInfo(animeLink: String, context: Context, receiver: ReceiveAnimeInfo ){
+        val queue = Volley.newRequestQueue(context)
+        val link = "https://shikimori.one/api$animeLink"
+        val stringRequest = object: StringRequest(
+            Request.Method.GET, link,
+            Response.Listener<String> { response ->
+
+                val obj = JSONObject(response)
+                val title = obj.getString("russian")
+                val kind = obj.getString("kind")
+                val year = obj.getString(
+                    if(kind == "movie") "released_on" else "aired_on")
+                val rating = obj.getString("score")
+                val description = obj.getString("description")
+                val image = obj.getJSONObject("image")
+                val posterLink = image.getString("original")
+                val smallPosterLink = image.getString("x96")
+
+                val info = AnimeInfo(
+                    link,
+                    title,
+                    year,
+                    rating,
+                    description,
+                    posterLink,
+                    smallPosterLink
+                )
+                receiver.receive(info)
+            },
+            Response.ErrorListener {  })
+        {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["User-Agent"] = "node-shikimori"
+                return headers
+            }
+        }
+        queue.add(stringRequest)
+    }
 
     public fun getAnimeScreenshotLinks(animes: ArrayList<Anime>, context: Context) {
 

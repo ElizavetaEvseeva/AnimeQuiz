@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentContainerView
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.smg.animequiz.quiz.QuestionBank
 import com.smg.animequiz.shikimoriapi.ShikimoriService
 
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setupActionBarWithNavController(findNavController(R.id.fragmentContainerView))
     }
 
     private var quizFragment: QuizFragment? = null
@@ -33,7 +36,12 @@ class MainActivity : AppCompatActivity() {
 
         public val gameState = GameState()
 
+        val dbHelper: DBHelper = DBHelper(context, null)
+
         val context get() = instance!!.applicationContext
+
+
+        public val getInstance get() = instance
 
 
         public fun startQuizSession(fragment: QuizFragment, year: Int){
@@ -63,7 +71,7 @@ class MainActivity : AppCompatActivity() {
 
 
             val quizFragment = instance!!
-                . findViewById<FragmentContainerView>(R.id.fragmentContainerView)
+                .findViewById<FragmentContainerView>(R.id.fragmentContainerView)
                 .getFragment<QuizFragment>()
             quizFragment.run()
         }

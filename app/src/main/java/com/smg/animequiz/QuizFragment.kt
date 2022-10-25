@@ -16,6 +16,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.smg.animequiz.quiz.Question
 import com.smg.animequiz.quiz.QuestionBank
+import com.squareup.picasso.Picasso
 
 class QuizFragment : Fragment() {
 
@@ -86,10 +87,9 @@ class QuizFragment : Fragment() {
         buttonD.setOnClickListener { buttonAnswerClick(buttonD) }
 
 
-        buttonNext = view.findViewById(R.id.idButtonNext)
-        buttonNext.setOnClickListener { buttonNextClick() }
+        view.findViewById<Button>(R.id.idButtonNext).setOnClickListener { buttonNextClick() }
 
-        buttonAbout = view.findViewById(R.id.idButtonAbout)
+         view.findViewById<Button>(R.id.idButtonAbout).setOnClickListener { buttonAboutClick()  }
 
         quizImage = view.findViewById(R.id.idImageMainQuiz)
 
@@ -108,6 +108,12 @@ class QuizFragment : Fragment() {
         } else {
             setNextQuestion()
         }
+    }
+
+    private fun buttonAboutClick(){
+        val b = Bundle()
+        b.putString("anime_link", currentQuestion!!.answer.link)
+        this.navController.navigate(R.id.action_quizFragment2_to_aboutAnimeFragment, b)
     }
 
     private fun buttonAnswerClick(answerButton: Button){
@@ -138,7 +144,7 @@ class QuizFragment : Fragment() {
         buttonC.text = q.options[2].title
         buttonD.text = q.options[3].title
 
-        quizImage.setImageBitmap(MainActivity.shikimoriService.getAnimeScreenshot(q.answer.screenshotLink!!))
+        MainActivity.shikimoriService.loadPictureIntoView(quizImage, q.answer.screenshotLink!!)
 
         textProgress.text = "$nextQuestionIndex/$QUESTION_COUNT"
 
