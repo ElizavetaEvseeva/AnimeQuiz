@@ -1,11 +1,6 @@
 package com.smg.animequiz.quiz
 
-import android.util.Log
-import com.smg.animequiz.LOG_TAG
-import com.smg.animequiz.MainActivity
-import com.smg.animequiz.QuizApp
 import com.smg.animequiz.models.Anime
-import com.smg.animequiz.models.AnimeCharacter
 import kotlin.random.Random
 
 class QuestionBank() {
@@ -68,10 +63,3 @@ class QuestionBank() {
         return animes
     }
 }
-//private fun getRandomAnimeForChar(char: AnimeCharacter, sourceList: ArrayList<Anime>): Anime{
-//    var anime = sourceList[Random.nextInt(0, sourceList.count())]
-//    while(char.anime == anime){
-//        anime = sourceList[Random.nextInt(0, sourceList.count())]
-//    }
-//    return anime
-//}

@@ -37,19 +37,29 @@ class TitleRVAdapter (
     override fun onBindViewHolder(holder: TitleRVAdapter.TitleViewHolder, position: Int) {
         holder.titleNameTV.text = titlesList[position].name
         holder.link = titlesList[position].link
+        holder.posterLink = titlesList[position].posterLink
+        //QuizApp.instance.getShikimoriService.loadPictureIntoView(
+        //    holder.titleIV,
+        //    titlesList[position].posterLink)
+    }
+
+    override fun onViewAttachedToWindow(holder: TitleViewHolder) {
+        super.onViewAttachedToWindow(holder)
         QuizApp.instance.getShikimoriService.loadPictureIntoView(
             holder.titleIV,
-            titlesList[position].posterLink)
+            holder.posterLink)
+
     }
 
     override fun getItemCount(): Int {
-        return titlesList.size
+        return titlesList.count()
     }
 
     class TitleViewHolder(itemView: View, ): RecyclerView.ViewHolder(itemView){
         val titleNameTV: TextView = itemView.findViewById(R.id.idTVTitle)
         val titleIV: ImageView = itemView.findViewById(R.id.idIVAnimeIcon)
         public var link: String = ""
+        public var posterLink: String =""
         init{
             itemView.findViewById<CardView>(R.id.idTitleItemCardView).setOnClickListener{
                 val b = Bundle()

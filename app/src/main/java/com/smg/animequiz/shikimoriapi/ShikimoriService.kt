@@ -34,33 +34,6 @@ class ShikimoriService {
         fun run(success: Boolean)
     }
 
-    //var queue: RequestQueue? = null
-
-
-    public fun getWeatherData(queue: RequestQueue, callback: DataParsedCallback){
-        Log.d(LOG_TAG, "GETTING WEATHER")
-        val link = "https://yahoo-weather5.p.rapidapi.com/weather?location=tokyo&format=json&u=c"
-        val stringRequest = object: StringRequest(
-            Request.Method.GET, link,
-            Response.Listener<String> { response ->
-                val content = JSONObject(response)
-                if (content != null ){
-                    Log.d(LOG_TAG, "GOT RESPONSE")
-                    callback.run(true)
-                }
-            },
-            Response.ErrorListener {  })
-        {
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["X-RapidAPI-Key"] = "85d73a73c6msh923a91b87ee6eaep104d13jsn57875f488e8a"
-                headers["X-RapidAPI-Host"] = "yahoo-weather5.p.rapidapi.com"
-                return headers
-            }
-        }
-        queue.add(stringRequest)
-    }
-
     public fun getTestMainJsonString(count: Int,year: Int, queue: RequestQueue, callback: DataParsedCallback){
 
         jsonContents = when(year){

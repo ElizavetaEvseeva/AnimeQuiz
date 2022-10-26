@@ -24,7 +24,8 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
                 ID_COL + " INTEGER PRIMACY KEY, " +
                 NAME_COL + " TEXT, " +
                 LINK_COL + " TEXT," +
-                POSTER_LINK_COL + " TEXT" +
+                POSTER_LINK_COL + " TEXT," +
+                "UNIQUE($NAME_COL)" +
                 ")" )
         db.execSQL(query)
     }
@@ -41,12 +42,10 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
     fun addTitle(name: String, link: String, posterLink: String){
         val values = ContentValues()
+        val db = this.readableDatabase
         values.put(NAME_COL, name)
         values.put(LINK_COL, link)
         values.put(POSTER_LINK_COL, posterLink)
-
-        val db = this.writableDatabase
-
         db.insert(TABLE_NAME, null, values)
         db.close()
     }

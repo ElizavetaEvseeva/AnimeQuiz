@@ -49,8 +49,8 @@ class QuizApp: Application() {
         Log.d(LOG_TAG, "Starting quiz session from main activity")
         gameState = GameState()
         gameState.state = State.LOADING
-        //shikimoriService.getMainJsonString(QUESTION_COUNT, year, getRequestQueue()) {
-        shikimoriService.getTestMainJsonString(QUESTION_COUNT, year, getRequestQueue()) {
+        shikimoriService.getMainJsonString(QUESTION_COUNT, year, getRequestQueue()) {
+        //shikimoriService.getTestMainJsonString(QUESTION_COUNT, year, getRequestQueue()) {
             Log.d(LOG_TAG, "GOT MAIN STRING, parsing")
             dataParsedCallback(it)
         }
@@ -68,7 +68,8 @@ class QuizApp: Application() {
         }
 
         //questionBank.generateQuestions(shikimoriService.allAnimeTitles, QUESTION_COUNT)
-        questionBank.generateTestQuestions(shikimoriService.allAnimeTitles, QUESTION_COUNT)
+        //questionBank.generateTestQuestions(shikimoriService.allAnimeTitles, QUESTION_COUNT)
+        questionBank.generateQuestions(shikimoriService.allAnimeTitles, QUESTION_COUNT)
 
         val animesToLoadScreenShots = ArrayList<Anime>()
         questionBank.questions.forEach{
